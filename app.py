@@ -175,8 +175,8 @@ def place_order(customer_info):
 
 # ============== FRONT PAGE ==============
 if st.session_state.show_front_page:
-    # Light, food-themed background ONLY on welcome page
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         .stApp {
             background-image: url("https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1400");
@@ -184,43 +184,61 @@ if st.session_state.show_front_page:
             background-position: center;
             background-attachment: fixed;
         }
-        /* Full-page light overlay for better contrast */
+
         .welcome-overlay {
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.82);
             min-height: 100vh;
             padding: 3rem 1rem;
         }
+
         .welcome-inner {
             max-width: 900px;
             margin: 0 auto;
         }
+
+        .foodcosta-title {
+            font-family: 'Pacifico', cursive;
+            font-size: 3.3rem;
+            color: #d84315;
+            text-align: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .foodcosta-subtitle {
+            font-size: 1.05rem;
+            text-align: center;
+            color: #333333;
+            margin-bottom: 2rem;
+        }
+
+        .main-block {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+        }
         </style>
-    """, unsafe_allow_html=True)
 
-    # Everything (title + subtitle + card + button) INSIDE overlay
-    st.markdown('<div class="welcome-overlay"><div class="welcome-inner">', unsafe_allow_html=True)
-
-    st.markdown(
-        '<div class="foodcosta-title">Welcome to FoodCosta</div>',
-        unsafe_allow_html=True
+        <div class="welcome-overlay">
+          <div class="welcome-inner">
+            <div class="foodcosta-title">Welcome to FoodCosta</div>
+            <div class="foodcosta-subtitle">
+              Your favorite food, freshly prepared and delivered fast.
+            </div>
+            <div class="main-block">
+              <h3>Start your food journey 🍽️</h3>
+              <p>Browse delicious restaurants and add your favorites to the cart.</p>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-    st.markdown(
-        '<div class="foodcosta-subtitle">'
-        'Your favorite food, freshly prepared and delivered fast.'
-        '</div>',
-        unsafe_allow_html=True
-    )
 
-    st.markdown('<div class="main-block">', unsafe_allow_html=True)
-    st.markdown("### Start your food journey 🍽️")
-    st.write("Browse delicious restaurants and add your favorites to the cart.")
-
+    # Button must be rendered by Streamlit, but still within the visual card
     if st.button("Explore FoodCosta 🚀"):
         st.session_state.show_front_page = False
         st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)          # close main-block
-    st.markdown('</div></div>', unsafe_allow_html=True)    # close welcome-inner + overlay
 
 
 # ============== MAIN APP (no background image) ==============
