@@ -4,10 +4,79 @@ import os
 
 # Page config
 st.set_page_config(
-    page_title="FoodExpress - Food Delivery",
+    page_title="FoodCosta - Food Delivery",
     page_icon="🍕",
     layout="wide"
 )
+
+# Global CSS: background + custom font + buttons
+st.markdown("""
+    <style>
+    /* Load a handwritten-style font */
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+    /* App background */
+    .stApp {
+        background-image: url("https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    /* Translucent card for main content on home page */
+    .main-block {
+        background: rgba(255, 255, 255, 0.88);
+        padding: 2rem;
+        border-radius: 1rem;
+    }
+
+    /* Big handwritten welcome text */
+    .foodcosta-title {
+        font-family: 'Pacifico', cursive;
+        font-size: 3.5rem;
+        color: #ff5722;
+        text-align: center;
+        text-shadow: 2px 2px 5px rgba(0,0,0,0.25);
+        margin-top: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .foodcosta-subtitle {
+        font-size: 1.1rem;
+        text-align: center;
+        color: #ffffff;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        margin-bottom: 2rem;
+    }
+
+    /* Button styling */
+    .stButton>button {
+        width: 100%;
+        background-color: #FF6B35;
+        color: white;
+        border-radius: 8px;
+        padding: 10px;
+        border: none;
+        font-weight: 600;
+    }
+    .stButton>button:hover {
+        background-color: #FF5722;
+    }
+
+    /* Price + rating styling */
+    .price-tag {
+        color: #FF6B35;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    h1 {
+        color: #FF6B35;
+    }
+    .rating {
+        color: #FFC107;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Initialize Supabase client
 @st.cache_resource
@@ -25,35 +94,6 @@ if 'selected_restaurant' not in st.session_state:
     st.session_state.selected_restaurant = None
 if 'show_checkout' not in st.session_state:
     st.session_state.show_checkout = False
-
-# Custom CSS
-st.markdown("""
-<style>
-    .stButton>button {
-        width: 100%;
-        background-color: #FF6B35;
-        color: white;
-        border-radius: 8px;
-        padding: 10px;
-        border: none;
-        font-weight: 600;
-    }
-    .stButton>button:hover {
-        background-color: #FF5722;
-    }
-    .price-tag {
-        color: #FF6B35;
-        font-size: 24px;
-        font-weight: bold;
-    }
-    h1 {
-        color: #FF6B35;
-    }
-    .rating {
-        color: #FFC107;
-    }
-</style>
-""", unsafe_allow_html=True)
 
 # Helper functions
 def get_restaurants():
@@ -142,9 +182,13 @@ def place_order(customer_info):
 # Header
 col1, col2, col3 = st.columns([3, 2, 1])
 with col1:
-    st.title("🍕 FoodExpress")
+    st.title("🍕 FoodCosta")
 with col2:
-    search_term = st.text_input("🔍 Search", placeholder="Search restaurants or food...", label_visibility="collapsed")
+    search_term = st.text_input(
+        "🔍 Search",
+        placeholder="Search restaurants or food...",
+        label_visibility="collapsed"
+    )
 with col3:
     cart_count = get_cart_count()
     if st.button(f"🛒 Cart ({cart_count})"):
@@ -173,7 +217,10 @@ if st.session_state.show_checkout:
                 st.markdown(f"**{item['name']}**")
                 st.caption(item['description'])
             with col2:
-                st.markdown(f"<span class='price-tag'>${item['price']:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span class='price-tag'>${item['price']:.2f}</span>",
+                    unsafe_allow_html=True
+                )
             with col3:
                 st.write(f"Qty: {quantity}")
             with col4:
@@ -191,7 +238,10 @@ if st.session_state.show_checkout:
         
         # Total
         total = get_cart_total()
-        st.markdown(f"### Total: <span class='price-tag'>${total:.2f}</span>", unsafe_allow_html=True)
+        st.markdown(
+            f"### Total: <span class='price-tag'>${total:.2f}</span>",
+            unsafe_allow_html=True
+        )
         
         # Customer information form
         st.subheader("📝 Delivery Information")
@@ -200,7 +250,10 @@ if st.session_state.show_checkout:
             name = st.text_input("Full Name*", placeholder="John Doe")
             email = st.text_input("Email*", placeholder="john@example.com")
             phone = st.text_input("Phone*", placeholder="+1 234 567 8900")
-            address = st.text_area("Delivery Address*", placeholder="123 Main St, City, State, ZIP")
+            address = st.text_area(
+                "Delivery Address*",
+                placeholder="123 Main St, City, State, ZIP"
+            )
             
             col1, col2 = st.columns(2)
             with col1:
@@ -244,7 +297,10 @@ elif st.session_state.selected_restaurant:
         st.header(restaurant['name'])
         st.write(restaurant['description'])
     with col2:
-        st.markdown(f"<span class='rating'>⭐ {restaurant['rating']}</span>", unsafe_allow_html=True)
+        st.markdown(
+            f"<span class='rating'>⭐ {restaurant['rating']}</span>",
+            unsafe_allow_html=True
+        )
         st.caption(f"🕒 {restaurant['delivery_time']}")
     
     st.markdown("---")
@@ -254,7 +310,10 @@ elif st.session_state.selected_restaurant:
     menu_items = get_menu_items(restaurant['id'])
     
     if search_term:
-        menu_items = [item for item in menu_items if search_term.lower() in item['name'].lower()]
+        menu_items = [
+            item for item in menu_items
+            if search_term.lower() in item['name'].lower()
+        ]
     
     # Display menu in grid
     cols = st.columns(3)
@@ -265,7 +324,10 @@ elif st.session_state.selected_restaurant:
             st.caption(item['description'])
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown(f"<span class='price-tag'>${item['price']:.2f}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span class='price-tag'>${item['price']:.2f}</span>",
+                    unsafe_allow_html=True
+                )
             with col2:
                 if st.button("Add to Cart", key=f"add_{item['id']}"):
                     add_to_cart(item)
@@ -273,13 +335,28 @@ elif st.session_state.selected_restaurant:
             st.markdown("---")
 
 else:
-    # Restaurants page
+    # Front page + Restaurants page
+    st.markdown(
+        '<div class="foodcosta-title">Welcome to FoodCosta</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '<div class="foodcosta-subtitle">'
+        'Your favorite food, freshly prepared and delivered fast.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown('<div class="main-block">', unsafe_allow_html=True)
     st.header("🏪 Popular Restaurants")
     
     restaurants = get_restaurants()
     
     if search_term:
-        restaurants = [r for r in restaurants if search_term.lower() in r['name'].lower()]
+        restaurants = [
+            r for r in restaurants
+            if search_term.lower() in r['name'].lower()
+        ]
     
     # Display restaurants in grid
     cols = st.columns(4)
@@ -290,7 +367,10 @@ else:
             st.caption(restaurant['description'])
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown(f"<span class='rating'>⭐ {restaurant['rating']}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span class='rating'>⭐ {restaurant['rating']}</span>",
+                    unsafe_allow_html=True
+                )
             with col2:
                 st.caption(f"🕒 {restaurant['delivery_time']}")
             
@@ -298,4 +378,5 @@ else:
                 st.session_state.selected_restaurant = restaurant
                 st.rerun()
             
-            st.markdown("---")    
+            st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)
