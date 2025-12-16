@@ -186,16 +186,19 @@ if st.session_state.show_front_page:
         }
         /* Full-page light overlay for better contrast */
         .welcome-overlay {
-            background: rgba(255, 255, 255, 0.78);  /* increase alpha to make lighter */
+            background: rgba(255, 255, 255, 0.78);
             min-height: 100vh;
-            padding-top: 3rem;
-            padding-bottom: 3rem;
+            padding: 3rem 1rem;
+        }
+        .welcome-inner {
+            max-width: 900px;
+            margin: 0 auto;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # Overlay start
-    st.markdown('<div class="welcome-overlay">', unsafe_allow_html=True)
+    # Everything (title + subtitle + card + button) INSIDE overlay
+    st.markdown('<div class="welcome-overlay"><div class="welcome-inner">', unsafe_allow_html=True)
 
     st.markdown(
         '<div class="foodcosta-title">Welcome to FoodCosta</div>',
@@ -216,8 +219,8 @@ if st.session_state.show_front_page:
         st.session_state.show_front_page = False
         st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)  # overlay end
+    st.markdown('</div>', unsafe_allow_html=True)          # close main-block
+    st.markdown('</div></div>', unsafe_allow_html=True)    # close welcome-inner + overlay
 
 
 # ============== MAIN APP (no background image) ==============
