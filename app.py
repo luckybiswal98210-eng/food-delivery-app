@@ -9,23 +9,34 @@ st.set_page_config(
     layout="wide"
 )
 
-# Global CSS: background + custom font + buttons
+# Initialize Supabase client
+@st.cache_resource
+def init_supabase() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+supabase = init_supabase()
+
+# Initialize session state
+if 'cart' not in st.session_state:
+    st.session_state.cart = {}
+if 'selected_restaurant' not in st.session_state:
+    st.session_state.selected_restaurant = None
+if 'show_checkout' not in st.session_state:
+    st.session_state.show_checkout = False
+if 'show_front_page' not in st.session_state:
+    st.session_state.show_front_page = True  # front page shown first
+
+# ----- CSS: only things that apply everywhere (buttons, fonts etc.) -----
 st.markdown("""
     <style>
     /* Load a handwritten-style font */
     @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-    /* App background */
-    .stApp {
-        background-image: url("https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }
-
     /* Translucent card for main content on front page */
     .main-block {
-        background: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.92);
         padding: 2rem;
         border-radius: 1rem;
     }
@@ -33,19 +44,19 @@ st.markdown("""
     /* Big handwritten welcome text */
     .foodcosta-title {
         font-family: 'Pacifico', cursive;
-        font-size: 3.5rem;
-        color: #ff5722;
+        font-size: 3.3rem;
+        color: #ff7043;
         text-align: center;
-        text-shadow: 2px 2px 5px rgba(0,0,0,0.25);
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         margin-top: 0.5rem;
         margin-bottom: 0.25rem;
     }
 
     .foodcosta-subtitle {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         text-align: center;
         color: #ffffff;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.35);
         margin-bottom: 2rem;
     }
 
@@ -77,25 +88,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# Initialize Supabase client
-@st.cache_resource
-def init_supabase() -> Client:
-    url = st.secrets["SUPABASE_URL"]
-    key = st.secrets["SUPABASE_KEY"]
-    return create_client(url, key)
-
-supabase = init_supabase()
-
-# Initialize session state
-if 'cart' not in st.session_state:
-    st.session_state.cart = {}
-if 'selected_restaurant' not in st.session_state:
-    st.session_state.selected_restaurant = None
-if 'show_checkout' not in st.session_state:
-    st.session_state.show_checkout = False
-if 'show_front_page' not in st.session_state:
-    st.session_state.show_front_page = True  # front page shown first
 
 # Helper functions
 def get_restaurants():
@@ -183,6 +175,19 @@ def place_order(customer_info):
 
 # ============== FRONT PAGE ==============
 if st.session_state.show_front_page:
+    # Light, food-themed background ONLY on welcome page
+    st.markdown("""
+        <style>
+        .stApp {
+            background-image: url("https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1400");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            /* Light overlay via background color on top elements will make text readable */
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.markdown(
         '<div class="foodcosta-title">Welcome to FoodCosta</div>',
         unsafe_allow_html=True
@@ -204,8 +209,18 @@ if st.session_state.show_front_page:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ============== MAIN APP (after front page) ==============
+# ============== MAIN APP (no background image) ==============
 else:
+    # Remove background image for the rest of the app (plain light background)
+    st.markdown("""
+        <style>
+        .stApp {
+            background-image: none !important;
+            background-color: #fafafa;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     # Header
     col1, col2, col3 = st.columns([3, 2, 1])
     with col1:
