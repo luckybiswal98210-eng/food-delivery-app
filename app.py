@@ -23,7 +23,7 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* Translucent card for main content on home page */
+    /* Translucent card for main content on front page */
     .main-block {
         background: rgba(255, 255, 255, 0.88);
         padding: 2rem;
@@ -94,6 +94,8 @@ if 'selected_restaurant' not in st.session_state:
     st.session_state.selected_restaurant = None
 if 'show_checkout' not in st.session_state:
     st.session_state.show_checkout = False
+if 'show_front_page' not in st.session_state:
+    st.session_state.show_front_page = True  # front page shown first
 
 # Helper functions
 def get_restaurants():
@@ -179,163 +181,8 @@ def place_order(customer_info):
     except Exception as e:
         return False, str(e)
 
-# Header
-col1, col2, col3 = st.columns([3, 2, 1])
-with col1:
-    st.title("🍕 FoodCosta")
-with col2:
-    search_term = st.text_input(
-        "🔍 Search",
-        placeholder="Search restaurants or food...",
-        label_visibility="collapsed"
-    )
-with col3:
-    cart_count = get_cart_count()
-    if st.button(f"🛒 Cart ({cart_count})"):
-        st.session_state.show_checkout = True
-
-st.markdown("---")
-
-# Main content
-if st.session_state.show_checkout:
-    # Checkout page
-    st.header("🛒 Your Cart")
-    
-    if len(st.session_state.cart) == 0:
-        st.info("Your cart is empty")
-        if st.button("← Back to Restaurants"):
-            st.session_state.show_checkout = False
-            st.rerun()
-    else:
-        # Display cart items
-        for item_id, item_data in st.session_state.cart.items():
-            item = item_data['item']
-            quantity = item_data['quantity']
-            
-            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-            with col1:
-                st.markdown(f"**{item['name']}**")
-                st.caption(item['description'])
-            with col2:
-                st.markdown(
-                    f"<span class='price-tag'>${item['price']:.2f}</span>",
-                    unsafe_allow_html=True
-                )
-            with col3:
-                st.write(f"Qty: {quantity}")
-            with col4:
-                col_minus, col_plus = st.columns(2)
-                with col_minus:
-                    if st.button("➖", key=f"minus_{item_id}"):
-                        update_cart_quantity(item_id, -1)
-                        st.rerun()
-                with col_plus:
-                    if st.button("➕", key=f"plus_{item_id}"):
-                        update_cart_quantity(item_id, 1)
-                        st.rerun()
-            
-            st.markdown("---")
-        
-        # Total
-        total = get_cart_total()
-        st.markdown(
-            f"### Total: <span class='price-tag'>${total:.2f}</span>",
-            unsafe_allow_html=True
-        )
-        
-        # Customer information form
-        st.subheader("📝 Delivery Information")
-        
-        with st.form("checkout_form"):
-            name = st.text_input("Full Name*", placeholder="John Doe")
-            email = st.text_input("Email*", placeholder="john@example.com")
-            phone = st.text_input("Phone*", placeholder="+1 234 567 8900")
-            address = st.text_area(
-                "Delivery Address*",
-                placeholder="123 Main St, City, State, ZIP"
-            )
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                submit = st.form_submit_button("Place Order 🚀")
-            with col2:
-                cancel = st.form_submit_button("← Back to Menu")
-            
-            if submit:
-                if not all([name, email, phone, address]):
-                    st.error("Please fill in all fields")
-                else:
-                    customer_info = {
-                        'name': name,
-                        'email': email,
-                        'phone': phone,
-                        'address': address
-                    }
-                    success, result = place_order(customer_info)
-                    if success:
-                        st.success(f"🎉 Order placed successfully! Order ID: {result}")
-                        st.balloons()
-                        st.info("Your order will be delivered soon!")
-                    else:
-                        st.error(f"Error placing order: {result}")
-            
-            if cancel:
-                st.session_state.show_checkout = False
-                st.rerun()
-
-elif st.session_state.selected_restaurant:
-    # Menu page
-    restaurant = st.session_state.selected_restaurant
-    
-    if st.button("← Back to Restaurants"):
-        st.session_state.selected_restaurant = None
-        st.rerun()
-    
-    # Restaurant header
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.header(restaurant['name'])
-        st.write(restaurant['description'])
-    with col2:
-        st.markdown(
-            f"<span class='rating'>⭐ {restaurant['rating']}</span>",
-            unsafe_allow_html=True
-        )
-        st.caption(f"🕒 {restaurant['delivery_time']}")
-    
-    st.markdown("---")
-    st.subheader("📋 Menu")
-    
-    # Fetch and display menu items
-    menu_items = get_menu_items(restaurant['id'])
-    
-    if search_term:
-        menu_items = [
-            item for item in menu_items
-            if search_term.lower() in item['name'].lower()
-        ]
-    
-    # Display menu in grid
-    cols = st.columns(3)
-    for idx, item in enumerate(menu_items):
-        with cols[idx % 3]:
-            st.image(item['image_url'], use_container_width=True)
-            st.markdown(f"**{item['name']}**")
-            st.caption(item['description'])
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown(
-                    f"<span class='price-tag'>${item['price']:.2f}</span>",
-                    unsafe_allow_html=True
-                )
-            with col2:
-                if st.button("Add to Cart", key=f"add_{item['id']}"):
-                    add_to_cart(item)
-                    st.rerun()
-            st.markdown("---")
-
-else:
-    # Front page + Restaurants page
+# ============== FRONT PAGE ==============
+if st.session_state.show_front_page:
     st.markdown(
         '<div class="foodcosta-title">Welcome to FoodCosta</div>',
         unsafe_allow_html=True
@@ -348,35 +195,201 @@ else:
     )
 
     st.markdown('<div class="main-block">', unsafe_allow_html=True)
-    st.header("🏪 Popular Restaurants")
-    
-    restaurants = get_restaurants()
-    
-    if search_term:
-        restaurants = [
-            r for r in restaurants
-            if search_term.lower() in r['name'].lower()
-        ]
-    
-    # Display restaurants in grid
-    cols = st.columns(4)
-    for idx, restaurant in enumerate(restaurants):
-        with cols[idx % 4]:
-            st.image(restaurant['image_url'], use_container_width=True)
-            st.markdown(f"**{restaurant['name']}**")
-            st.caption(restaurant['description'])
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown(
-                    f"<span class='rating'>⭐ {restaurant['rating']}</span>",
-                    unsafe_allow_html=True
-                )
-            with col2:
-                st.caption(f"🕒 {restaurant['delivery_time']}")
-            
-            if st.button("View Menu", key=f"restaurant_{restaurant['id']}"):
-                st.session_state.selected_restaurant = restaurant
-                st.rerun()
-            
-            st.markdown("---")
+    st.markdown("### Start your food journey 🍽️")
+    st.write("Browse delicious restaurants and add your favorites to the cart.")
+
+    if st.button("Explore FoodCosta 🚀"):
+        st.session_state.show_front_page = False
+        st.rerun()
+
     st.markdown('</div>', unsafe_allow_html=True)
+
+# ============== MAIN APP (after front page) ==============
+else:
+    # Header
+    col1, col2, col3 = st.columns([3, 2, 1])
+    with col1:
+        st.title("🍕 FoodCosta")
+    with col2:
+        search_term = st.text_input(
+            "🔍 Search",
+            placeholder="Search restaurants or food...",
+            label_visibility="collapsed"
+        )
+    with col3:
+        cart_count = get_cart_count()
+        if st.button(f"🛒 Cart ({cart_count})"):
+            st.session_state.show_checkout = True
+
+    st.markdown("---")
+
+    # Main content
+    if st.session_state.show_checkout:
+        # Checkout page
+        st.header("🛒 Your Cart")
+        
+        if len(st.session_state.cart) == 0:
+            st.info("Your cart is empty")
+            if st.button("← Back to Restaurants"):
+                st.session_state.show_checkout = False
+                st.rerun()
+        else:
+            # Display cart items
+            for item_id, item_data in st.session_state.cart.items():
+                item = item_data['item']
+                quantity = item_data['quantity']
+                
+                col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                with col1:
+                    st.markdown(f"**{item['name']}**")
+                    st.caption(item['description'])
+                with col2:
+                    st.markdown(
+                        f"<span class='price-tag'>${item['price']:.2f}</span>",
+                        unsafe_allow_html=True
+                    )
+                with col3:
+                    st.write(f"Qty: {quantity}")
+                with col4:
+                    col_minus, col_plus = st.columns(2)
+                    with col_minus:
+                        if st.button("➖", key=f"minus_{item_id}"):
+                            update_cart_quantity(item_id, -1)
+                            st.rerun()
+                    with col_plus:
+                        if st.button("➕", key=f"plus_{item_id}"):
+                            update_cart_quantity(item_id, 1)
+                            st.rerun()
+                
+                st.markdown("---")
+            
+            # Total
+            total = get_cart_total()
+            st.markdown(
+                f"### Total: <span class='price-tag'>${total:.2f}</span>",
+                unsafe_allow_html=True
+            )
+            
+            # Customer information form
+            st.subheader("📝 Delivery Information")
+            
+            with st.form("checkout_form"):
+                name = st.text_input("Full Name*", placeholder="John Doe")
+                email = st.text_input("Email*", placeholder="john@example.com")
+                phone = st.text_input("Phone*", placeholder="+1 234 567 8900")
+                address = st.text_area(
+                    "Delivery Address*",
+                    placeholder="123 Main St, City, State, ZIP"
+                )
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    submit = st.form_submit_button("Place Order 🚀")
+                with col2:
+                    cancel = st.form_submit_button("← Back to Menu")
+                
+                if submit:
+                    if not all([name, email, phone, address]):
+                        st.error("Please fill in all fields")
+                    else:
+                        customer_info = {
+                            'name': name,
+                            'email': email,
+                            'phone': phone,
+                            'address': address
+                        }
+                        success, result = place_order(customer_info)
+                        if success:
+                            st.success(f"🎉 Order placed successfully! Order ID: {result}")
+                            st.balloons()
+                            st.info("Your order will be delivered soon!")
+                        else:
+                            st.error(f"Error placing order: {result}")
+                
+                if cancel:
+                    st.session_state.show_checkout = False
+                    st.rerun()
+
+    elif st.session_state.selected_restaurant:
+        # Menu page
+        restaurant = st.session_state.selected_restaurant
+        
+        if st.button("← Back to Restaurants"):
+            st.session_state.selected_restaurant = None
+            st.rerun()
+        
+        # Restaurant header
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.header(restaurant['name'])
+            st.write(restaurant['description'])
+        with col2:
+            st.markdown(
+                f"<span class='rating'>⭐ {restaurant['rating']}</span>",
+                unsafe_allow_html=True
+            )
+            st.caption(f"🕒 {restaurant['delivery_time']}")
+        
+        st.markdown("---")
+        st.subheader("📋 Menu")
+        
+        # Fetch and display menu items
+        menu_items = get_menu_items(restaurant['id'])
+        
+        if search_term:
+            menu_items = [
+                item for item in menu_items
+                if search_term.lower() in item['name'].lower()
+            ]
+        
+        # Display menu in grid
+        cols = st.columns(3)
+        for idx, item in enumerate(menu_items):
+            with cols[idx % 3]:
+                st.image(item['image_url'], use_container_width=True)
+                st.markdown(f"**{item['name']}**")
+                st.caption(item['description'])
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        f"<span class='price-tag'>${item['price']:.2f}</span>",
+                        unsafe_allow_html=True
+                    )
+                with col2:
+                    if st.button("Add to Cart", key=f"add_{item['id']}"):
+                        add_to_cart(item)
+                        st.rerun()
+                st.markdown("---")
+
+    else:
+        # Restaurants list page (after front page)
+        st.header("🏪 Popular Restaurants")
+        
+        restaurants = get_restaurants()
+        
+        if search_term:
+            restaurants = [
+                r for r in restaurants
+                if search_term.lower() in r['name'].lower()
+            ]
+        
+        cols = st.columns(4)
+        for idx, restaurant in enumerate(restaurants):
+            with cols[idx % 4]:
+                st.image(restaurant['image_url'], use_container_width=True)
+                st.markdown(f"**{restaurant['name']}**")
+                st.caption(restaurant['description'])
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        f"<span class='rating'>⭐ {restaurant['rating']}</span>",
+                        unsafe_allow_html=True
+                    )
+                with col2:
+                    st.caption(f"🕒 {restaurant['delivery_time']}")
+                
+                if st.button("View Menu", key=f"restaurant_{restaurant['id']}"):
+                    st.session_state.selected_restaurant = restaurant
+                    st.rerun()
+                
+                st.markdown("---")
