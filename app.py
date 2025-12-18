@@ -2,6 +2,9 @@ import streamlit as st
 from supabase import create_client, Client
 import os
 
+# ---------- SETTINGS ----------
+USD_TO_INR = 90  # 1 USD ≈ ₹90, change if you want
+
 # Page config
 st.set_page_config(
     page_title="FoodCosta - Food Delivery",
@@ -41,22 +44,22 @@ st.markdown("""
         border-radius: 1rem;
     }
 
-    /* Big handwritten welcome text */
+    /* Bigger handwritten welcome text */
     .foodcosta-title {
         font-family: 'Pacifico', cursive;
-        font-size: 3.3rem;
+        font-size: 4.0rem;      /* increased */
         color: #ff7043;
         text-align: center;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         margin-top: 0.5rem;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
     }
 
     .foodcosta-subtitle {
-        font-size: 1.05rem;
+        font-size: 1.3rem;      /* increased */
         text-align: center;
-        color: #ffffff;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.35);
+        color: #333333;
+        text-shadow: none;
         margin-bottom: 2rem;
     }
 
@@ -89,7 +92,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Helper functions
+# ---------- Helper functions ----------
+
+def usd_to_inr(amount_usd: float) -> float:
+    return amount_usd * USD_TO_INR
+
+def format_inr(amount_usd: float) -> str:
+    inr = usd_to_inr(amount_usd)
+    return f"₹{inr:,.0f}"
+
 def get_restaurants():
     """Fetch all restaurants from Supabase"""
     try:
@@ -127,12 +138,15 @@ def update_cart_quantity(item_id, delta):
         if st.session_state.cart[item_id]['quantity'] <= 0:
             del st.session_state.cart[item_id]
 
-def get_cart_total():
-    """Calculate cart total"""
+def get_cart_total_usd():
+    """Calculate cart total in USD (from DB prices)"""
     total = 0
     for item_data in st.session_state.cart.values():
         total += item_data['item']['price'] * item_data['quantity']
     return total
+
+def get_cart_total_inr():
+    return usd_to_inr(get_cart_total_usd())
 
 def get_cart_count():
     """Get total items in cart"""
@@ -141,26 +155,26 @@ def get_cart_count():
 def place_order(customer_info):
     """Place order in Supabase"""
     try:
-        # Create order
+        # Store total in INR
         order_data = {
             'customer_name': customer_info['name'],
             'customer_email': customer_info['email'],
             'customer_phone': customer_info['phone'],
             'delivery_address': customer_info['address'],
-            'total_amount': get_cart_total(),
+            'total_amount': get_cart_total_inr(),
             'status': 'pending'
         }
         order_response = supabase.table('orders').insert(order_data).execute()
         order_id = order_response.data[0]['id']
         
-        # Create order items
+        # Create order items (store INR price)
         order_items = []
         for item_data in st.session_state.cart.values():
             order_items.append({
                 'order_id': order_id,
                 'menu_item_id': item_data['item']['id'],
                 'quantity': item_data['quantity'],
-                'price': item_data['item']['price']
+                'price': usd_to_inr(item_data['item']['price'])
             })
         
         supabase.table('order_items').insert(order_items).execute()
@@ -196,22 +210,6 @@ if st.session_state.show_front_page:
             margin: 0 auto;
         }
 
-        .foodcosta-title {
-            font-family: 'Pacifico', cursive;
-            font-size: 3.3rem;
-            color: #d84315;
-            text-align: center;
-            margin-top: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .foodcosta-subtitle {
-            font-size: 1.05rem;
-            text-align: center;
-            color: #333333;
-            margin-bottom: 2rem;
-        }
-
         .main-block {
             background: rgba(255, 255, 255, 0.95);
             padding: 2rem;
@@ -239,7 +237,6 @@ if st.session_state.show_front_page:
     if st.button("Explore FoodCosta 🚀"):
         st.session_state.show_front_page = False
         st.rerun()
-
 
 # ============== MAIN APP (no background image) ==============
 else:
@@ -292,7 +289,7 @@ else:
                     st.caption(item['description'])
                 with col2:
                     st.markdown(
-                        f"<span class='price-tag'>${item['price']:.2f}</span>",
+                        f"<span class='price-tag'>{format_inr(item['price'])}</span>",
                         unsafe_allow_html=True
                     )
                 with col3:
@@ -310,10 +307,9 @@ else:
                 
                 st.markdown("---")
             
-            # Total
-            total = get_cart_total()
+            # Total (INR)
             st.markdown(
-                f"### Total: <span class='price-tag'>${total:.2f}</span>",
+                f"### Total: <span class='price-tag'>{format_inr(get_cart_total_usd())}</span>",
                 unsafe_allow_html=True
             )
             
@@ -323,10 +319,10 @@ else:
             with st.form("checkout_form"):
                 name = st.text_input("Full Name*", placeholder="John Doe")
                 email = st.text_input("Email*", placeholder="john@example.com")
-                phone = st.text_input("Phone*", placeholder="+1 234 567 8900")
+                phone = st.text_input("Phone*", placeholder="+91 98765 43210")
                 address = st.text_area(
                     "Delivery Address*",
-                    placeholder="123 Main St, City, State, ZIP"
+                    placeholder="123 Main St, City, State, PIN"
                 )
                 
                 col1, col2 = st.columns(2)
@@ -399,7 +395,7 @@ else:
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(
-                        f"<span class='price-tag'>${item['price']:.2f}</span>",
+                        f"<span class='price-tag'>{format_inr(item['price'])}</span>",
                         unsafe_allow_html=True
                     )
                 with col2:
