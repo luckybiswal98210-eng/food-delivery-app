@@ -33,64 +33,62 @@ if 'show_front_page' not in st.session_state:
 
 # ----- CSS: only things that apply everywhere (buttons, fonts etc.) -----
 st.markdown("""
-    <style>
-    /* Load a handwritten-style font */
-    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-    /* Translucent card for main content on front page */
-    .main-block {
-        background: rgba(255, 255, 255, 0.92);
-        padding: 2rem;
-        border-radius: 1rem;
-    }
+/* ===== GLOBAL VISIBILITY FIX ===== */
+[data-testid="stMarkdownContainer"] *,
+[data-testid="stText"] *,
+.foodcosta-title,
+.foodcosta-subtitle,
+.main-block,
+.main-block * {
+    color: #000 !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+    position: relative;
+    z-index: 10;
+}
 
-    /* Bigger handwritten welcome text */
-    .foodcosta-title {
-        font-family: 'Pacifico', cursive;
-        font-size: 4.0rem;      /* increased */
-        color: #ff7043;
-        text-align: center;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
+/* ===== FRONT CARD ===== */
+.main-block {
+    background: rgba(255,255,255,0.98) !important;
+    padding: 2rem;
+    border-radius: 1rem;
+}
 
-    .foodcosta-subtitle {
-        font-size: 1.3rem;      /* increased */
-        text-align: center;
-        color: #333333;
-        text-shadow: none;
-        margin-bottom: 2rem;
-    }
+/* ===== TITLES ===== */
+.foodcosta-title {
+    font-family: 'Pacifico', cursive;
+    font-size: 4rem;
+    color: #ff7043 !important;
+    text-align: center;
+}
+.foodcosta-subtitle {
+    font-size: 1.3rem;
+    text-align: center;
+    color: #111 !important;
+}
 
-    /* Button styling */
-    .stButton>button {
-        width: 100%;
-        background-color: #FF6B35;
-        color: white;
-        border-radius: 8px;
-        padding: 10px;
-        border: none;
-        font-weight: 600;
-    }
-    .stButton>button:hover {
-        background-color: #FF5722;
-    }
+/* ===== BUTTON ===== */
+.stButton>button {
+    width: 100%;
+    background: #FF6B35;
+    color: white !important;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+    font-weight: 700;
+}
+.stButton>button:hover { background: #FF5722; }
 
-    /* Price + rating styling */
-    .price-tag {
-        color: #FF6B35;
-        font-size: 24px;
-        font-weight: bold;
-    }
-    h1 {
-        color: #FF6B35;
-    }
-    .rating {
-        color: #FFC107;
-    }
-    </style>
+/* ===== PRICE / RATING ===== */
+.price-tag { color:#FF6B35 !important; font-size:24px; font-weight:bold; }
+h1 { color:#FF6B35 !important; }
+.rating { color:#FFC107 !important; }
+</style>
 """, unsafe_allow_html=True)
+
 
 # ---------- Helper functions ----------
 
