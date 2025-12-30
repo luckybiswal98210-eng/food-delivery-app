@@ -36,28 +36,26 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 
-/* ===== GLOBAL VISIBILITY FIX ===== */
-[data-testid="stMarkdownContainer"] *,
-[data-testid="stText"] *,
-.foodcosta-title,
-.foodcosta-subtitle,
-.main-block,
-.main-block * {
-    color: #000 !important;
-    font-weight: 700 !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
-    position: relative;
-    z-index: 10;
+/* NORMAL TEXT RESTORE */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] span,
+[data-testid="stMarkdownContainer"] div,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3 {
+    color:#111 !important;
+    font-weight:500 !important;
+    text-shadow:none !important;
 }
 
-/* ===== FRONT CARD ===== */
+/* FRONT PAGE CARD */
 .main-block {
-    background: rgba(255,255,255,0.98) !important;
+    background: rgba(255,255,255,0.95);
     padding: 2rem;
     border-radius: 1rem;
 }
 
-/* ===== TITLES ===== */
+/* TITLES */
 .foodcosta-title {
     font-family: 'Pacifico', cursive;
     font-size: 4rem;
@@ -67,27 +65,27 @@ st.markdown("""
 .foodcosta-subtitle {
     font-size: 1.3rem;
     text-align: center;
-    color: #111 !important;
+    color: #333 !important;
 }
 
-/* ===== BUTTON ===== */
+/* BUTTON */
 .stButton>button {
     width: 100%;
     background: #FF6B35;
-    color: white !important;
+    color: white;
     border-radius: 8px;
     padding: 10px;
     border: none;
-    font-weight: 700;
+    font-weight: 600;
 }
-.stButton>button:hover { background: #FF5722; }
+.stButton>button:hover { background:#FF5722; }
 
-/* ===== PRICE / RATING ===== */
-.price-tag { color:#FF6B35 !important; font-size:24px; font-weight:bold; }
-h1 { color:#FF6B35 !important; }
-.rating { color:#FFC107 !important; }
+/* PRICE & RATING */
+.price-tag { color:#FF6B35; font-size:24px; font-weight:bold; }
+.rating { color:#FFC107; }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ---------- Helper functions ----------
